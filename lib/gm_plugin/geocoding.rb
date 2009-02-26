@@ -17,7 +17,8 @@ module Ym4r
       def self.get(request,options = {})
         api_key = ApiKey.get(options)
         output =  options[:output] || "kml"
-        url = "http://maps.google.com/maps/geo?q=#{URI.encode(request)}&key=#{api_key}&output=#{output}"
+        output_encoding = options[:output_encoding] || "utf-8"
+        url = "http://maps.google.com/maps/geo?q=#{URI.encode(request)}&key=#{api_key}&output=#{output}&oe=#{output_encoding}"
 
         res = open(url).read
 
