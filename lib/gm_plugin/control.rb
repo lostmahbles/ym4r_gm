@@ -110,7 +110,7 @@ module Ym4r
                     else
                       "G_ANCHOR_BOTTOM_LEFT"
                     end
-        "new google.maps.LocalSearch(options), new GControlPosition(#{js_anchor}, new GSize(#{ow},#{oh}))"
+        "new google.maps.LocalSearch(#{options}), new GControlPosition(#{js_anchor}, new GSize(#{ow},#{oh}))"
       end
     end
 
