@@ -76,70 +76,74 @@ module Ym4r
       end
 
       #Initializes the controls: you can pass a hash with keys <tt>:small_map</tt>, <tt>:large_map</tt>, <tt>:large_map_3d</tt>, <tt>:small_zoom</tt>, <tt>:small_zoom_3d</tt>, <tt>:scale</tt>, <tt>:map_type</tt>, <tt>:menu_map_type</tt>, <tt>:hierarchical_map_type</tt>, <tt>:nav_label</tt>, <tt>:overview_map</tt> and hash of options controlling its display (<tt>:hide</tt> and <tt>:size</tt>), <tt>:local_search</tt>, <tt>:local_search_options</tt>, and <tt>:show_on_focus</tt>
-      def control_init(controls = {})
-        @init_end << add_control(GSmallMapControl.new) if controls[:small_map]
-        @init_end << add_control(GLargeMapControl.new) if controls[:large_map]
-        @init_end << add_control(GLargeMapControl3D.new) if controls[:large_map_3d]
-        @init_end << add_control(GSmallZoomControl.new) if controls[:small_zoom]
-        @init_end << add_control(GSmallZoomControl3D.new) if controls[:small_zoom_3d]
-        @init_end << add_control(GScaleControl.new) if controls[:scale]
-        @init_end << add_control(GMapTypeControl.new) if controls[:map_type]
-        @init_end << add_control(GHierarchicalMapTypeControl.new) if controls[:hierarchical_map_type]        
-        @init_end << add_control(GMenuMapTypeControl.new) if controls[:menu_map_type]        
-        @init_end << add_control(GNavLabelControl.new) if controls[:nav_label]        
-        if controls[:overview_map]
-          if controls[:overview_map].is_a?(Hash)
-            hide = controls[:overview_map][:hide]
-            size = controls[:overview_map][:size]
+      def control_init(controls = {}, no_controls = false)
+        unless no_controls then
+          @init_end << add_control(GSmallMapControl.new) if controls[:small_map]
+          @init_end << add_control(GLargeMapControl.new) if controls[:large_map]
+          @init_end << add_control(GLargeMapControl3D.new) if controls[:large_map_3d]
+          @init_end << add_control(GSmallZoomControl.new) if controls[:small_zoom]
+          @init_end << add_control(GSmallZoomControl3D.new) if controls[:small_zoom_3d]
+          @init_end << add_control(GScaleControl.new) if controls[:scale]
+          @init_end << add_control(GMapTypeControl.new) if controls[:map_type]
+          @init_end << add_control(GHierarchicalMapTypeControl.new) if controls[:hierarchical_map_type]        
+          @init_end << add_control(GMenuMapTypeControl.new) if controls[:menu_map_type]        
+          @init_end << add_control(GNavLabelControl.new) if controls[:nav_label]        
+          if controls[:overview_map]
+            if controls[:overview_map].is_a?(Hash)
+              hide = controls[:overview_map][:hide]
+              size = controls[:overview_map][:size]
+            end
+            overview_control = GOverviewMapControl.new(size)
+            @global_init << overview_control.declare("#{@variable}_ovm") if hide
+            @init_end << add_control(overview_control)
+            @init_end << "#{overview_control.variable}.hide(true);" if hide
           end
-          overview_control = GOverviewMapControl.new(size)
-          @global_init << overview_control.declare("#{@variable}_ovm") if hide
-          @init_end << add_control(overview_control)
-          @init_end << "#{overview_control.variable}.hide(true);" if hide
-        end
-        @init_end << add_control(GLocalSearchControl.new(controls[:anchor], controls[:offset_width], controls[:offset_height], controls[:local_search_options])) if controls[:local_search]
-        if controls[:show_on_focus]  # Should be last
-          @init_end << "#{@variable}.hideControls();"
-          event_init(self, :mouseover, "function(){#{@variable}.showControls();}")
-          event_init(self, :mouseout,  "function(){#{@variable}.hideControls();}")
+          @init_end << add_control(GLocalSearchControl.new(controls[:anchor], controls[:offset_width], controls[:offset_height], controls[:local_search_options])) if controls[:local_search]
+          if controls[:show_on_focus]  # Should be last
+            @init_end << "#{@variable}.hideControls();"
+            event_init(self, :mouseover, "function(){#{@variable}.showControls();}")
+            event_init(self, :mouseout,  "function(){#{@variable}.hideControls();}")
+          end
         end
       end
       
       #Initializes the interface configuration: double-click zoom, dragging, continuous zoom,... You can pass a hash with keys <tt>:dragging</tt>, <tt>:info_window</tt>, <tt>:double_click_zoom</tt>, <tt>:continuous_zoom</tt> and <tt>:scroll_wheel_zoom</tt>. The values should be true or false. Check the google maps API doc to know what the default values are.
-      def interface_init(interface = {})
-        if !interface[:dragging].nil?
-          if interface[:dragging]
-             @init << enableDragging() 
-          else
-            @init << disableDragging() 
+      def interface_init(interface = {}, disable_if = false)
+        unless disable_if then
+          if !interface[:dragging].nil?
+            if interface[:dragging]
+               @init << enableDragging() 
+            else
+              @init << disableDragging() 
+            end
           end
-        end
-        if !interface[:info_window].nil?
-          if interface[:info_window]
-            @init << enableInfoWindow()
-          else
-            @init << disableInfoWindow()
+          if !interface[:info_window].nil?
+            if interface[:info_window]
+              @init << enableInfoWindow()
+            else
+              @init << disableInfoWindow()
+            end
           end
-        end
-        if !interface[:double_click_zoom].nil?
-          if interface[:double_click_zoom]
-            @init << enableDoubleClickZoom()
-          else
-            @init << disableDoubleClickZoom()
+          if !interface[:double_click_zoom].nil?
+            if interface[:double_click_zoom]
+              @init << enableDoubleClickZoom()
+            else
+              @init << disableDoubleClickZoom()
+            end
           end
-        end
-        if !interface[:continuous_zoom].nil?
-          if interface[:continuous_zoom]
-            @init << enableContinuousZoom()
-          else
-            @init << disableContinuousZoom()
+          if !interface[:continuous_zoom].nil?
+            if interface[:continuous_zoom]
+              @init << enableContinuousZoom()
+            else
+              @init << disableContinuousZoom()
+            end
           end
-        end
-        if !interface[:scroll_wheel_zoom].nil?
-          if interface[:scroll_wheel_zoom]
-            @init << enableScrollWheelZoom()
-          else
-            @init << disableScrollWheelZoom()
+          if !interface[:scroll_wheel_zoom].nil?
+            if interface[:scroll_wheel_zoom]
+              @init << enableScrollWheelZoom()
+            else
+              @init << disableScrollWheelZoom()
+            end
           end
         end
       end
